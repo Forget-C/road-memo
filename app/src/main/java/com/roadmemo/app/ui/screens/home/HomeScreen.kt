@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,7 +59,7 @@ fun HomeScreen(
         item {
             RoadMemoScreenHeader(
                 title = "首页",
-                description = "围绕默认车辆查看本月支出、最近记录和到期提醒，形成持续更新的养车看板。",
+                description = "查看本月花费与最近动态",
                 trailing = {
                     RoadMemoSecondaryButton(
                         text = "车辆",
@@ -115,9 +114,9 @@ fun HomeScreen(
                         )
                         Text(
                             text = if (uiState.isEmpty) {
-                                "先补一辆车和第一条记录，首页就会开始形成你的月度账本。"
+                                "先加一辆车，再记第一笔，首页就会开始形成你的本月账本。"
                             } else {
-                                "默认按当前车辆统计，本月数据会随着切车和新记录实时刷新。"
+                                "当前默认车辆的本月花费，会随着新记录和切车实时更新。"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
@@ -274,7 +273,7 @@ private fun HomeHeroCard(
                         text = if (isEmpty) "先开始记第一笔" else "本月持续记账中",
                     )
                     RoadMemoSecondaryButton(
-                        text = if (isEmpty) "添加车辆" else "切换默认车辆",
+                        text = if (isEmpty) "添加" else "切车",
                         onClick = onOpenVehicles,
                         icon = RoadMemoIcons.Vehicle,
                     )

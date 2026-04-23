@@ -1,5 +1,6 @@
 package com.roadmemo.app.ui.screens.statistics
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,11 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,12 +37,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roadmemo.app.ui.components.RoadMemoEmptyListState
 import com.roadmemo.app.ui.components.RoadMemoHeroPill
 import com.roadmemo.app.ui.components.RoadMemoHeroSurface
+import com.roadmemo.app.ui.components.RoadMemoBadgeTone
 import com.roadmemo.app.ui.components.RoadMemoMiniInfoCard
 import com.roadmemo.app.ui.components.RoadMemoScreenHeader
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 import com.roadmemo.app.ui.components.RoadMemoSkeletonBlock
 import com.roadmemo.app.ui.components.RoadMemoSkeletonCard
+import com.roadmemo.app.ui.components.RoadMemoStatusBadge
 import com.roadmemo.app.ui.theme.RoadMemoIcons
 
 @Composable
@@ -58,12 +61,11 @@ fun StatisticsScreen(
         item {
             RoadMemoScreenHeader(
                 title = "统计",
-                description = "围绕默认车辆查看月度支出、分类构成和最近表现，快速判断养车成本变化。",
+                description = "汇总本月支出与变化",
                 trailing = {
-                    RoadMemoSecondaryButton(
+                    RoadMemoStatusBadge(
                         text = "本月",
-                        onClick = {},
-                        icon = RoadMemoIcons.Calendar,
+                        tone = RoadMemoBadgeTone.NEUTRAL,
                     )
                 },
             )
@@ -103,13 +105,13 @@ fun StatisticsScreen(
                 ) {
                     MiniStatCard(
                         modifier = Modifier.weight(1f),
-                        title = "记录规模",
+                        title = "本月记录",
                         value = uiState.recordCountText,
                     )
                     MiniStatCard(
                         modifier = Modifier.weight(1f),
-                        title = "统计口径",
-                        value = "默认车辆 / 本地记录",
+                        title = "当前范围",
+                        value = "本月 · 默认车辆",
                     )
                 }
             }
@@ -209,8 +211,8 @@ fun StatisticsScreen(
         }
 
         item {
-            RoadMemoSection(title = "当前说明") {
-                Text("V0.1 统计页先围绕默认车辆做真实汇总，后续再补多车对比、时间筛选和更完整的图表表达。")
+            RoadMemoSection(title = "后续能力") {
+                Text("后续会继续补多车对比、时间筛选和更完整的趋势图表，这一版先把默认车辆的核心月度账本跑通。")
             }
         }
     }
@@ -242,10 +244,9 @@ private fun StatisticsHeroCard(
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    RoadMemoSecondaryButton(
-                        text = "本月",
-                        onClick = {},
-                        icon = RoadMemoIcons.Calendar,
+                    RoadMemoStatusBadge(
+                        text = "本月视图",
+                        tone = RoadMemoBadgeTone.NEUTRAL,
                     )
                 }
 
@@ -268,10 +269,13 @@ private fun StatisticsHeroCard(
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     HeroStatPill(icon = RoadMemoIcons.Analytics, text = "真实汇总")
                     HeroStatPill(icon = RoadMemoIcons.Trend, text = "趋势追踪")
-                    HeroStatPill(icon = RoadMemoIcons.Vehicle, text = "默认车辆")
+                    HeroStatPill(icon = RoadMemoIcons.Vehicle, text = "默认")
                 }
             }
     }

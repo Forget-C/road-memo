@@ -130,6 +130,8 @@ app/src/main/java/com/roadmemo/app/
 - 通用组件统一放 `ui/components`
 - 颜色、字形、圆角、间距统一放 `ui/theme`
 - 导航统一从 `navigation` 维护，不允许页面内部自定义私有路由协议
+- 视觉参考稿统一放 `docs/assets`
+- Android 实际生效的图标 / 启动资源统一放 `app/src/main/res/mipmap*` 与 `app/src/main/res/drawable*`
 
 ---
 
@@ -363,7 +365,7 @@ RoadMemo 当前 UI 风格冻结为：
 主导航页：
 
 - 使用 `RoadMemoScreenHeader`
-- 首页 / 记录 / 统计 保持统一开场结构
+- 首页 / 记录 / 统计 / 设置 保持统一开场结构
 
 隐藏业务页：
 
@@ -380,6 +382,13 @@ RoadMemo 当前 UI 风格冻结为：
 - 优先使用 `RoadMemoTextField`
 - 日期优先使用 `RoadMemoDateField`
 - 错误反馈优先显示在字段级
+
+启动页：
+
+- Android 启动链路允许采用“两段式”
+  - 系统启动页：浅色背景、弱化图标
+  - 应用内品牌启动页：展示完整全屏启动图
+- 若已冻结完整启动图，优先展示全屏图片，不回退为圆形缩略图品牌页
 
 ---
 

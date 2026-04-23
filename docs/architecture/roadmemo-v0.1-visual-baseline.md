@@ -139,3 +139,37 @@ RoadMemo V0.1 的视觉方向冻结为：
 
 V0.1 后续所有视觉方案默认以本文件为准。  
 若没有新的产品决策，不再回到“厚重、老气、仪表盘感强”的方向。
+
+## 10. 当前已选视觉稿与已落地资源
+
+当前已确认并拆分为两张独立视觉稿，作为 Android 正式资源的设计基线：
+
+- 应用图标参考稿：[roadmemo-app-icon-v1.png](/Users/extreme/Projects/github.com/road-memo/docs/assets/roadmemo-app-icon-v1.png)
+- 启动图参考稿：[roadmemo-splash-v1.png](/Users/extreme/Projects/github.com/road-memo/docs/assets/roadmemo-splash-v1.png)
+
+当前已落地到项目中的 Android 资源：
+
+- 启动器图标：
+  - `app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`
+  - `app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`
+- 图标前景图：
+  - `app/src/main/res/drawable-nodpi/roadmemo_launcher_foreground.png`
+- 启动图资源：
+  - `app/src/main/res/drawable-nodpi/roadmemo_splash_image.png`
+  - `app/src/main/res/drawable/roadmemo_splash_legacy_background.xml`
+
+当前启动策略：
+
+- Android 系统启动阶段弱化图标展示，仅保留浅色启动背景
+- 应用进入 Compose 后，立即展示全屏 `roadmemo-splash-v1.png` 品牌启动页
+- 启动页采用完整图片铺满屏幕，而不是圆形缩略图窗口
+
+使用约束：
+
+- 参考稿继续保存在 `docs/assets/`，作为后续重导资源时的基线
+- `app/src/main/res/` 中的资源视为当前实际生效资产
+- 后续若继续调整正式资源，应保持：
+  - 抽象路线 / 记录 / 车辆的组合隐喻
+  - 浅色背景
+  - calm teal 主强调
+  - 现代准扁平、商业工具化风格

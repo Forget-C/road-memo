@@ -1,13 +1,16 @@
 package com.roadmemo.app.ui.screens.reminder
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -113,11 +116,25 @@ fun ReminderScreen(
                             modifier = Modifier.padding(18.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
                                 RoadMemoStatusBadge(
                                     text = reminder.badgeText,
                                     tone = reminder.sourceType.toBadgeTone(),
                                 )
+                                if (reminder.sourceType != null && reminder.sourceId != null) {
+                                    RoadMemoSecondaryButton(
+                                        text = sourceLabel(reminder.sourceType),
+                                        onClick = { onOpenSource(reminder) },
+                                    )
+                                }
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(
                                     text = reminder.title,
                                     style = MaterialTheme.typography.titleMedium,
@@ -127,16 +144,10 @@ fun ReminderScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            androidx.compose.foundation.layout.Row(
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                             ) {
-                                if (reminder.sourceType != null && reminder.sourceId != null) {
-                                    RoadMemoSecondaryButton(
-                                        text = sourceLabel(reminder.sourceType),
-                                        onClick = { onOpenSource(reminder) },
-                                    )
-                                }
                                 RoadMemoSecondaryButton(
                                     text = "忽略",
                                     onClick = {
@@ -165,9 +176,9 @@ fun ReminderScreen(
 }
 
 private fun sourceLabel(sourceType: ReminderSourceType): String = when (sourceType) {
-    ReminderSourceType.RENEWAL_RECORD -> "查看来源"
-    ReminderSourceType.MAINTENANCE_RECORD -> "查看来源"
-    ReminderSourceType.MANUAL -> "查看来源"
+    ReminderSourceType.RENEWAL_RECORD -> "来源"
+    ReminderSourceType.MAINTENANCE_RECORD -> "来源"
+    ReminderSourceType.MANUAL -> "来源"
 }
 
 private fun ReminderSourceType?.toBadgeTone(): RoadMemoBadgeTone = when (this) {

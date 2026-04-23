@@ -33,8 +33,11 @@ import com.roadmemo.app.ui.components.RoadMemoFeedbackMessage
 import com.roadmemo.app.ui.components.RoadMemoFeedbackTone
 import com.roadmemo.app.ui.components.RoadMemoEmptyStateCard
 import com.roadmemo.app.ui.components.RoadMemoFormHeader
+import com.roadmemo.app.ui.components.RoadMemoMiniInfoCard
 import com.roadmemo.app.ui.components.RoadMemoPageScaffold
 import com.roadmemo.app.ui.components.RoadMemoSection
+import com.roadmemo.app.ui.components.RoadMemoStatusBadge
+import com.roadmemo.app.ui.components.RoadMemoBadgeTone
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
 import com.roadmemo.app.ui.components.RoadMemoTextField
@@ -83,7 +86,7 @@ fun VehicleScreen(
                 ) {
                     Column(
                         modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
                         Text(
                             text = "车辆概览",
@@ -91,13 +94,32 @@ fun VehicleScreen(
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Text(
-                            text = if (uiState.vehicles.isEmpty()) "还没有车辆，先添加第一辆车。" else "已记录 ${uiState.vehicles.size} 辆车",
+                            text = uiState.vehicles.firstOrNull { it.isDefault }?.let {
+                                "${it.brand} ${it.model}"
+                            } ?: "先添加第一辆车",
                             style = MaterialTheme.typography.titleMedium,
                         )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            RoadMemoMiniInfoCard(
+                                title = "车辆数量",
+                                value = "${uiState.vehicles.size} 辆",
+                                modifier = Modifier.weight(1f),
+                            )
+                            RoadMemoMiniInfoCard(
+                                title = "默认车辆",
+                                value = uiState.vehicles.firstOrNull { it.isDefault }?.plateNumber
+                                    ?.takeIf { it.isNotBlank() }
+                                    ?: "未设置",
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                         Text(
                             text = uiState.vehicles.firstOrNull { it.isDefault }?.let {
-                                "当前默认：${it.brand} ${it.model}${it.plateNumber?.takeIf(String::isNotBlank)?.let { plate -> " · $plate" }.orEmpty()}"
-                            } ?: "添加后会自动把第一辆车设为默认。",
+                                "当前默认车辆会直接影响首页、记录、统计和提醒展示。"
+                            } ?: "添加后会自动把第一辆车设为默认，后续也可以随时切换。",
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
@@ -225,10 +247,9 @@ fun VehicleScreen(
                                 )
                             }
                             if (vehicle.isDefault) {
-                                Text(
+                                RoadMemoStatusBadge(
                                     text = "默认",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    tone = RoadMemoBadgeTone.PRIMARY,
                                 )
                             }
                         }

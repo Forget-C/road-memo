@@ -3,17 +3,10 @@ package com.roadmemo.app.ui.screens.records
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -67,52 +60,24 @@ fun RecordsScreen(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            val primaryAction = when (selectedTabIndex) {
+                1 -> onAddMaintenanceRecord
+                2 -> onAddExpenseRecord
+                3 -> onAddRenewalRecord
+                else -> onAddEnergyRecord
+            }
             RoadMemoScreenHeader(
                 title = "记录",
-                description = "按类型查看当前车辆的能源、保养、费用和续期流水，支持快速编辑和清理误录数据。",
+                description = "默认车辆 · ${uiState.vehicleTitle}",
+                trailing = {
+                    RoadMemoSecondaryButton(
+                        onClick = primaryAction,
+                        text = "新增",
+                        icon = RoadMemoIcons.Add,
+                    )
+                },
             )
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = "当前车辆",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = uiState.vehicleTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            }
         }
-        val primaryAction = when (selectedTabIndex) {
-            1 -> onAddMaintenanceRecord
-            2 -> onAddExpenseRecord
-            3 -> onAddRenewalRecord
-            else -> onAddEnergyRecord
-        }
-        val primaryActionLabel = when (selectedTabIndex) {
-            1 -> "新增保养记录"
-            2 -> "新增费用记录"
-            3 -> "新增续期事项"
-            else -> "新增能源记录"
-        }
-        RoadMemoSecondaryButton(
-            onClick = primaryAction,
-            text = primaryActionLabel,
-            icon = RoadMemoIcons.Add,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-        )
 
         SecondaryScrollableTabRow(selectedTabIndex = selectedTabIndex) {
             tabs.forEachIndexed { index, title ->

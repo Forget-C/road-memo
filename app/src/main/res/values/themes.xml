@@ -1,3 +1,10 @@
 <resources>
     <style name="Theme.RoadMemo" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.RoadMemo.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/roadmemo_splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/roadmemo_splash_transparent_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.RoadMemo</item>
+        <item name="android:windowBackground">@drawable/roadmemo_splash_legacy_background</item>
+    </style>
 </resources>
