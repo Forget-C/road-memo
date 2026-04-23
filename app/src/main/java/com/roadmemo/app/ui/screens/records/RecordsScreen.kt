@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -38,6 +35,8 @@ import com.roadmemo.app.ui.components.RoadMemoEmptyListState
 import com.roadmemo.app.ui.components.RoadMemoRecordCard
 import com.roadmemo.app.ui.components.RoadMemoScreenHeader
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
+import com.roadmemo.app.ui.components.RoadMemoSkeletonCard
+import com.roadmemo.app.ui.theme.RoadMemoIcons
 
 private val tabs = listOf("能源", "保养", "费用", "续期")
 
@@ -111,7 +110,7 @@ fun RecordsScreen(
         RoadMemoSecondaryButton(
             onClick = primaryAction,
             text = primaryActionLabel,
-            icon = Icons.Outlined.Add,
+            icon = RoadMemoIcons.Add,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
         )
 
@@ -137,12 +136,16 @@ fun RecordsScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (records.isEmpty()) {
+            if (uiState.isLoading) {
+                items(4) {
+                    RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 18.dp, 14.dp, 18.dp))
+                }
+            } else if (records.isEmpty()) {
                 item {
                     RoadMemoEmptyListState(
                         title = tabs[selectedTabIndex],
                         description = "当前类型还没有记录",
-                        icon = Icons.Outlined.DirectionsCar,
+                        icon = RoadMemoIcons.Vehicle,
                     )
                 }
             } else {

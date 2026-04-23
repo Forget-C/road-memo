@@ -243,11 +243,13 @@ app/src/main/java/com/roadmemo/app/
 - 字体
 - 圆角
 - 间距 token
+- 图标语义入口
 
 要求：
 
 - 所有新视觉常量优先进入 token / theme 层
 - 页面不允许随意散落新的视觉常量
+- 图标语义统一收口到 `RoadMemoIcons`
 
 ---
 
@@ -263,6 +265,8 @@ app/src/main/java/com/roadmemo/app/
 - `RoadMemoConfirmDialog`
 - `RoadMemoFeedbackMessage`
 - `RoadMemoSnackbarHost`
+- `RoadMemoSkeletonBlock`
+- `RoadMemoSkeletonCard`
 - `RoadMemoHeroSurface`
 - `RoadMemoMetricCard`
 - `RoadMemoMiniInfoCard`
@@ -274,6 +278,7 @@ app/src/main/java/com/roadmemo/app/
 - `RoadMemoPageScaffold`
 - `RoadMemoScreenHeader`
 - `RoadMemoListSectionHeader`
+- `RoadMemoIcons`
 
 使用规则：
 
@@ -290,6 +295,10 @@ app/src/main/java/com/roadmemo/app/
   - 例如：已调起系统分享、已忽略提醒、已标记完成
 - 空状态统一使用轻图标头的 `RoadMemoEmptyStateCard / RoadMemoEmptyListState`
   - 避免回退到纯文本“暂无数据”样式
+- 加载中状态优先使用 `RoadMemoSkeletonBlock / RoadMemoSkeletonCard`
+  - 避免首屏加载期误显示“暂无数据”
+- 图标语义统一从 `RoadMemoIcons` 获取
+  - 主导航、空状态、按钮图标禁止长期散落直取 `Icons.*`
 
 ---
 

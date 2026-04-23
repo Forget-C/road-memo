@@ -39,6 +39,7 @@ data class HomeUiState(
     val recentMaintenanceText: String? = null,
     val upcomingReminderTexts: List<String> = emptyList(),
     val isEmpty: Boolean = true,
+    val isLoading: Boolean = false,
 )
 
 @HiltViewModel
@@ -98,7 +99,7 @@ class HomeViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = HomeUiState(),
+        initialValue = HomeUiState(isLoading = true),
     )
 }
 
@@ -163,6 +164,7 @@ private fun Vehicle.toHomeUiState(
             reminder.remindAt?.let { "${reminder.title} · ${it.toDateText()}" } ?: reminder.title
         },
         isEmpty = energyRecords.isEmpty() && maintenanceRecords.isEmpty() && expenseRecords.isEmpty() && renewalRecords.isEmpty(),
+        isLoading = false,
     )
 }
 

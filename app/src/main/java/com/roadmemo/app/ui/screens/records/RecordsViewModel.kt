@@ -40,6 +40,7 @@ data class RecordsUiState(
     val expenseRecords: List<RecordListItem> = emptyList(),
     val renewalRecords: List<RecordListItem> = emptyList(),
     val isEmpty: Boolean = true,
+    val isLoading: Boolean = false,
 )
 
 @HiltViewModel
@@ -67,7 +68,7 @@ class RecordsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = RecordsUiState(),
+        initialValue = RecordsUiState(isLoading = true),
     )
 
     fun deleteEnergyRecord(recordId: Long) {
@@ -136,4 +137,5 @@ private fun Vehicle.toRecordsUiState(
         )
     },
     isEmpty = energy.isEmpty() && maintenance.isEmpty() && expense.isEmpty() && renewal.isEmpty(),
+    isLoading = false,
 )

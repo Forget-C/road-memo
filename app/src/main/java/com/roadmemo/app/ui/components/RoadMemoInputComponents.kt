@@ -3,8 +3,6 @@ package com.roadmemo.app.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.roadmemo.app.ui.theme.RoadMemoIcons
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -95,7 +94,7 @@ fun RoadMemoDateField(
         trailingIcon = {
             IconButton(onClick = { showDatePicker = true }) {
                 Icon(
-                    imageVector = Icons.Outlined.CalendarMonth,
+                    imageVector = RoadMemoIcons.Calendar,
                     contentDescription = "选择日期",
                 )
             }

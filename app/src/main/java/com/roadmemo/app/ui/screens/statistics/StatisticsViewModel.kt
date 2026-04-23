@@ -35,6 +35,7 @@ data class StatisticsUiState(
     val categorySummaryItems: List<String> = emptyList(),
     val recordCountText: String = "共 0 条记录",
     val recentHighlights: List<String> = emptyList(),
+    val isLoading: Boolean = false,
 )
 
 @HiltViewModel
@@ -68,7 +69,7 @@ class StatisticsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = StatisticsUiState(),
+        initialValue = StatisticsUiState(isLoading = true),
     )
 }
 
@@ -135,6 +136,7 @@ private fun Vehicle.toStatisticsUiState(
         categorySummaryItems = categorySummaryItems,
         recordCountText = "共 ${energy.size + maintenance.size + expense.size + renewal.size} 条记录，其中能源 ${energy.size}、保养 ${maintenance.size}、费用 ${expense.size}、续期 ${renewal.size}",
         recentHighlights = recentHighlights,
+        isLoading = false,
     )
 }
 

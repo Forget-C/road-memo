@@ -83,6 +83,7 @@ V1 设计系统的目标不是引入一套外部视觉库，而是基于 `Materi
 Theme Token Layer
 ├── Color
 ├── Typography
+├── Iconography
 ├── Radius
 ├── Spacing
 └── Elevation / State（后续）
@@ -101,6 +102,7 @@ Composite Component Layer
 ├── Hero Card
 ├── Metric Card
 ├── Record Card
+├── Skeleton
 ├── Summary Card
 ├── Empty State
 └── Vehicle Summary Card
@@ -124,12 +126,14 @@ Screen Pattern Layer
 - `RoadMemoTokens`
 - `RoadMemoShapes`
 - `RoadMemoTypography`
+- `RoadMemoIcons`
 
 V1 继续补齐：
 
 - 状态色 token
 - 按钮高度 token
 - 输入框间距 token
+- 图标语义与页面映射规则
 
 ### 5.2 Primitive 组件
 
@@ -159,6 +163,7 @@ V1 继续补齐：
 1. `RoadMemoRecordCard`
 2. `RoadMemoEmptyStateCard`
 3. `RoadMemoInfoGroupCard`
+4. `RoadMemoSkeletonCard`
 
 价值：
 
@@ -166,6 +171,7 @@ V1 继续补齐：
 - 空状态不再每页自己拼
 - 设置页、提醒页、统计页可共享信息卡
 - 空状态统一使用轻图标头，增强页面完成度但不引入重装饰
+- 首页、统计页、记录页在真实数据返回前优先展示骨架屏
 
 ---
 
@@ -249,6 +255,12 @@ V1 继续补齐：
 - 统一使用轻图标头 + 标题 + 说明三段式结构
 - 图标只做弱提示，不抢主信息
 - 禁止退回到单行“暂无数据”裸文本
+
+### 加载状态
+
+- 首屏加载优先展示 skeleton，而不是直接显示空状态
+- skeleton 使用弱对比平面块，不引入 shimmer 或重动画
+- 首页、统计页、记录页优先使用统一骨架卡和骨架块
 
 ---
 

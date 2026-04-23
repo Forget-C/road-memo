@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +29,7 @@ import com.roadmemo.app.ui.components.RoadMemoPageScaffold
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoStatusBadge
+import com.roadmemo.app.ui.theme.RoadMemoIcons
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,7 +98,7 @@ fun ReminderScreen(
                     RoadMemoEmptyStateCard(
                         title = "没有待处理提醒",
                         description = uiState.emptyText,
-                        icon = Icons.Outlined.NotificationsNone,
+                        icon = RoadMemoIcons.Reminder,
                     )
                 }
             } else {

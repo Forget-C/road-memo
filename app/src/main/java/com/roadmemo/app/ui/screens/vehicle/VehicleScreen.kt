@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +38,7 @@ import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
 import com.roadmemo.app.ui.components.RoadMemoTextField
+import com.roadmemo.app.ui.theme.RoadMemoIcons
 
 private val powertrainTabs = listOf("GASOLINE", "DIESEL", "HEV", "PHEV", "EV")
 
@@ -178,7 +177,7 @@ fun VehicleScreen(
                         RoadMemoEmptyStateCard(
                             title = "还没有车辆",
                             description = "先添加第一辆车，后续记录和统计都会围绕默认车辆展开。",
-                            icon = Icons.Outlined.DirectionsCar,
+                            icon = RoadMemoIcons.Vehicle,
                         )
                     } else {
                         Text(

@@ -17,11 +17,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.DirectionsCar
-import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,6 +40,9 @@ import com.roadmemo.app.ui.components.RoadMemoMiniInfoCard
 import com.roadmemo.app.ui.components.RoadMemoScreenHeader
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
+import com.roadmemo.app.ui.components.RoadMemoSkeletonBlock
+import com.roadmemo.app.ui.components.RoadMemoSkeletonCard
+import com.roadmemo.app.ui.theme.RoadMemoIcons
 
 @Composable
 fun StatisticsScreen(
@@ -65,45 +63,74 @@ fun StatisticsScreen(
                     RoadMemoSecondaryButton(
                         text = "本月",
                         onClick = {},
-                        icon = Icons.Outlined.CalendarMonth,
+                        icon = RoadMemoIcons.Calendar,
                     )
                 },
             )
         }
 
         item {
-            StatisticsHeroCard(
-                vehicleSummary = uiState.vehicleSummary,
-                monthlyTotalText = uiState.monthlyTotalText,
-                monthlyBreakdownText = uiState.monthlyBreakdownText,
-            )
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                MiniStatCard(
-                    modifier = Modifier.weight(1f),
-                    title = "记录规模",
-                    value = uiState.recordCountText,
-                )
-                MiniStatCard(
-                    modifier = Modifier.weight(1f),
-                    title = "统计口径",
-                    value = "默认车辆 / 本地记录",
+            if (uiState.isLoading) {
+                RoadMemoSkeletonCard(lineHeights = listOf(14.dp, 22.dp, 42.dp, 16.dp))
+            } else {
+                StatisticsHeroCard(
+                    vehicleSummary = uiState.vehicleSummary,
+                    monthlyTotalText = uiState.monthlyTotalText,
+                    monthlyBreakdownText = uiState.monthlyBreakdownText,
                 )
             }
         }
 
         item {
+            if (uiState.isLoading) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    RoadMemoSkeletonBlock(
+                        height = 92.dp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    RoadMemoSkeletonBlock(
+                        height = 92.dp,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    MiniStatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "记录规模",
+                        value = uiState.recordCountText,
+                    )
+                    MiniStatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "统计口径",
+                        value = "默认车辆 / 本地记录",
+                    )
+                }
+            }
+        }
+
+        item {
             RoadMemoSection(title = "近 6 个月趋势") {
-                if (uiState.monthTrendItems.isEmpty()) {
+                if (uiState.isLoading) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(3) {
+                            RoadMemoSkeletonBlock(
+                                height = 132.dp,
+                                modifier = Modifier.width(164.dp),
+                            )
+                        }
+                    }
+                } else if (uiState.monthTrendItems.isEmpty()) {
                     RoadMemoEmptyListState(
                         title = "暂无趋势数据",
                         description = "继续记录后，这里会逐步形成近 6 个月变化趋势。",
-                        icon = Icons.Outlined.BarChart,
+                        icon = RoadMemoIcons.Trend,
                     )
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -117,11 +144,17 @@ fun StatisticsScreen(
 
         item {
             RoadMemoSection(title = "分类汇总") {
-                if (uiState.categorySummaryItems.isEmpty()) {
+                if (uiState.isLoading) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 14.dp))
+                        RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 14.dp))
+                        RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 14.dp))
+                    }
+                } else if (uiState.categorySummaryItems.isEmpty()) {
                     RoadMemoEmptyListState(
                         title = "暂无分类汇总",
                         description = "有费用、保养、能源或续期记录后，这里会自动汇总分类表现。",
-                        icon = Icons.Outlined.QueryStats,
+                        icon = RoadMemoIcons.Analytics,
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -143,11 +176,16 @@ fun StatisticsScreen(
 
         item {
             RoadMemoSection(title = "最近表现") {
-                if (uiState.recentHighlights.isEmpty()) {
+                if (uiState.isLoading) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 16.dp))
+                        RoadMemoSkeletonCard(lineHeights = listOf(12.dp, 16.dp))
+                    }
+                } else if (uiState.recentHighlights.isEmpty()) {
                     RoadMemoEmptyListState(
                         title = "暂无最近记录",
                         description = "开始记录后，这里会显示最近补能、保养、费用和续期动态。",
-                        icon = Icons.Outlined.DirectionsCar,
+                        icon = RoadMemoIcons.Vehicle,
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -207,7 +245,7 @@ private fun StatisticsHeroCard(
                     RoadMemoSecondaryButton(
                         text = "本月",
                         onClick = {},
-                        icon = Icons.Outlined.CalendarMonth,
+                        icon = RoadMemoIcons.Calendar,
                     )
                 }
 
@@ -231,9 +269,9 @@ private fun StatisticsHeroCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HeroStatPill(icon = Icons.Outlined.QueryStats, text = "真实汇总")
-                    HeroStatPill(icon = Icons.Outlined.BarChart, text = "趋势追踪")
-                    HeroStatPill(icon = Icons.Outlined.DirectionsCar, text = "默认车辆")
+                    HeroStatPill(icon = RoadMemoIcons.Analytics, text = "真实汇总")
+                    HeroStatPill(icon = RoadMemoIcons.Trend, text = "趋势追踪")
+                    HeroStatPill(icon = RoadMemoIcons.Vehicle, text = "默认车辆")
                 }
             }
     }
