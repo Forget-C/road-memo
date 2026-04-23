@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -228,28 +229,44 @@ fun VehicleScreen(
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.Top,
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(
                                     "${vehicle.brand} ${vehicle.model}",
                                     style = MaterialTheme.typography.titleMedium,
                                 )
-                                Text(
-                                    buildString {
-                                        append(vehicle.powertrainType.toLabel())
-                                        if (!vehicle.plateNumber.isNullOrBlank()) {
-                                            append(" · ")
-                                            append(vehicle.plateNumber)
-                                        }
-                                    },
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RoadMemoStatusBadge(
+                                        text = vehicle.powertrainType.toLabel(),
+                                        tone = RoadMemoBadgeTone.NEUTRAL,
+                                    )
+                                    vehicle.plateNumber?.takeIf { it.isNotBlank() }?.let { plate ->
+                                        Text(
+                                            text = plate,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
-                            if (vehicle.isDefault) {
-                                RoadMemoStatusBadge(
-                                    text = "默认",
-                                    tone = RoadMemoBadgeTone.PRIMARY,
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                if (vehicle.isDefault) {
+                                    RoadMemoStatusBadge(
+                                        text = "默认",
+                                        tone = RoadMemoBadgeTone.PRIMARY,
+                                    )
+                                }
+                                RoadMemoSecondaryButton(
+                                    text = if (vehicle.isDefault) "默认中" else "设默认",
+                                    onClick = { viewModel.setDefaultVehicle(vehicle.id) },
+                                    enabled = !vehicle.isDefault,
+                                    modifier = Modifier.wrapContentWidth(),
                                 )
                             }
                         }
@@ -261,13 +278,6 @@ fun VehicleScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-
-                        RoadMemoSecondaryButton(
-                            text = if (vehicle.isDefault) "当前默认车辆" else "设为默认车辆",
-                            onClick = { viewModel.setDefaultVehicle(vehicle.id) },
-                            enabled = !vehicle.isDefault,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
                     }
                 }
             }
