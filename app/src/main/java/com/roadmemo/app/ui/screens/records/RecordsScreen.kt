@@ -2,23 +2,24 @@ package com.roadmemo.app.ui.screens.records
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,9 +28,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.roadmemo.app.ui.components.RoadMemoBadgeTone
+import com.roadmemo.app.ui.components.RoadMemoConfirmDialog
+import com.roadmemo.app.ui.components.RoadMemoEmptyListState
+import com.roadmemo.app.ui.components.RoadMemoRecordCard
+import com.roadmemo.app.ui.components.RoadMemoScreenHeader
+import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 
 private val tabs = listOf("能源", "保养", "费用", "续期")
 
@@ -56,27 +64,36 @@ fun RecordsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Card(
-            modifier = Modifier
-                .padding(start = 20.dp, top = 20.dp, end = 20.dp)
-                .fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            RoadMemoScreenHeader(
+                title = "记录",
+                description = "按类型查看当前车辆的能源、保养、费用和续期流水，支持快速编辑和清理误录数据。",
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             ) {
-                Text(
-                    text = "当前车辆",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = uiState.vehicleTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = "当前车辆",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = uiState.vehicleTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
         }
         val primaryAction = when (selectedTabIndex) {
@@ -91,12 +108,12 @@ fun RecordsScreen(
             3 -> "新增续期事项"
             else -> "新增能源记录"
         }
-        FilledTonalButton(
+        RoadMemoSecondaryButton(
             onClick = primaryAction,
+            text = primaryActionLabel,
+            icon = Icons.Outlined.Add,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-        ) {
-            Text(primaryActionLabel)
-        }
+        )
 
         SecondaryScrollableTabRow(selectedTabIndex = selectedTabIndex) {
             tabs.forEachIndexed { index, title ->
@@ -117,128 +134,75 @@ fun RecordsScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
+            contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (records.isEmpty()) {
                 item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                    ) {
-                        Column(modifier = Modifier.padding(18.dp)) {
-                            Text(
-                                text = tabs[selectedTabIndex],
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(modifier = Modifier.padding(top = 6.dp))
-                            Text(
-                                text = "当前类型还没有记录",
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                        }
-                    }
+                    RoadMemoEmptyListState(
+                        title = tabs[selectedTabIndex],
+                        description = "当前类型还没有记录",
+                        icon = Icons.Outlined.DirectionsCar,
+                    )
                 }
             } else {
                 items(records, key = { it.id }) { record ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                    ) {
-                        Column(modifier = Modifier.padding(18.dp)) {
-                            Text(
-                                text = tabs[selectedTabIndex],
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(modifier = Modifier.padding(top = 6.dp))
-                            Text(
-                                text = record.text,
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Spacer(modifier = Modifier.padding(top = 12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
-                            ) {
-                                if (selectedTabIndex == 0) {
-                                    Button(onClick = { onEditEnergyRecord(record.id) }) {
-                                        Text("编辑")
-                                    }
-                                } else if (selectedTabIndex == 1) {
-                                    Button(onClick = { onEditMaintenanceRecord(record.id) }) {
-                                        Text("编辑")
-                                    }
-                                } else if (selectedTabIndex == 3) {
-                                    Button(onClick = { onEditRenewalRecord(record.id) }) {
-                                        Text("编辑")
-                                    }
-                                } else if (selectedTabIndex == 2) {
-                                    Button(onClick = { onEditExpenseRecord(record.id) }) {
-                                        Text("编辑")
-                                    }
-                                }
-                                Button(
-                                    onClick = {
-                                        pendingDeleteAction = when (selectedTabIndex) {
-                                            0 -> PendingDeleteAction(
-                                                title = "删除能源记录",
-                                                message = "确认删除这条能源记录吗？删除后无法恢复。",
-                                                onConfirm = { viewModel.deleteEnergyRecord(record.id) },
-                                            )
-                                            1 -> PendingDeleteAction(
-                                                title = "删除保养记录",
-                                                message = "确认删除这条保养记录吗？删除后无法恢复。",
-                                                onConfirm = { viewModel.deleteMaintenanceRecord(record.id) },
-                                            )
-                                            2 -> PendingDeleteAction(
-                                                title = "删除费用记录",
-                                                message = "确认删除这条费用记录吗？删除后无法恢复。",
-                                                onConfirm = { viewModel.deleteExpenseRecord(record.id) },
-                                            )
-                                            else -> PendingDeleteAction(
-                                                title = "删除续期事项",
-                                                message = "确认删除这条续期事项吗？关联提醒也会一起删除。",
-                                                onConfirm = { viewModel.deleteRenewalRecord(record.id) },
-                                            )
-                                        }
-                                    },
-                                ) {
-                                    Text("删除")
-                                }
+                    RoadMemoRecordCard(
+                        typeLabel = record.typeLabel,
+                        title = record.title,
+                        subtitle = record.subtitle,
+                        amountText = record.amountText,
+                        badgeTone = when (selectedTabIndex) {
+                            1 -> RoadMemoBadgeTone.WARNING
+                            3 -> RoadMemoBadgeTone.NEUTRAL
+                            else -> RoadMemoBadgeTone.PRIMARY
+                        },
+                        onEdit = when (selectedTabIndex) {
+                            0 -> ({ onEditEnergyRecord(record.id) })
+                            1 -> ({ onEditMaintenanceRecord(record.id) })
+                            2 -> ({ onEditExpenseRecord(record.id) })
+                            else -> ({ onEditRenewalRecord(record.id) })
+                        },
+                        onDelete = {
+                            pendingDeleteAction = when (selectedTabIndex) {
+                                0 -> PendingDeleteAction(
+                                    title = "删除能源记录",
+                                    message = "确认删除这条能源记录吗？删除后无法恢复。",
+                                    onConfirm = { viewModel.deleteEnergyRecord(record.id) },
+                                )
+                                1 -> PendingDeleteAction(
+                                    title = "删除保养记录",
+                                    message = "确认删除这条保养记录吗？删除后无法恢复。",
+                                    onConfirm = { viewModel.deleteMaintenanceRecord(record.id) },
+                                )
+                                2 -> PendingDeleteAction(
+                                    title = "删除费用记录",
+                                    message = "确认删除这条费用记录吗？删除后无法恢复。",
+                                    onConfirm = { viewModel.deleteExpenseRecord(record.id) },
+                                )
+                                else -> PendingDeleteAction(
+                                    title = "删除续期事项",
+                                    message = "确认删除这条续期事项吗？关联提醒也会一起删除。",
+                                    onConfirm = { viewModel.deleteRenewalRecord(record.id) },
+                                )
                             }
-                        }
-                    }
+                        },
+                    )
                 }
             }
         }
     }
 
     pendingDeleteAction?.let { action ->
-        AlertDialog(
-            onDismissRequest = { pendingDeleteAction = null },
-            title = { Text(action.title) },
-            text = { Text(action.message) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        action.onConfirm()
-                        pendingDeleteAction = null
-                    },
-                ) {
-                    Text("确认删除")
-                }
+        RoadMemoConfirmDialog(
+            title = action.title,
+            message = action.message,
+            confirmText = "确认删除",
+            onConfirm = {
+                action.onConfirm()
+                pendingDeleteAction = null
             },
-            dismissButton = {
-                TextButton(onClick = { pendingDeleteAction = null }) {
-                    Text("取消")
-                }
-            },
+            onDismiss = { pendingDeleteAction = null },
         )
     }
 }

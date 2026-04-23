@@ -1,16 +1,21 @@
 package com.roadmemo.app.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.Timelapse
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -18,11 +23,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.roadmemo.app.ui.components.RoadMemoHeroPill
+import com.roadmemo.app.ui.components.RoadMemoHeroSurface
+import com.roadmemo.app.ui.components.RoadMemoListSectionHeader
+import com.roadmemo.app.ui.components.RoadMemoMetricCard
+import com.roadmemo.app.ui.components.RoadMemoScreenHeader
 import com.roadmemo.app.ui.components.RoadMemoSection
+import com.roadmemo.app.ui.components.RoadMemoSecondaryButton
 import com.roadmemo.app.ui.theme.RoadMemoWarning
 
 @Composable
@@ -43,25 +57,32 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = uiState.title,
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Text(
-                    text = "当前车辆",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = uiState.vehicleTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
+            RoadMemoScreenHeader(
+                title = "首页",
+                description = "围绕默认车辆查看本月支出、最近记录和到期提醒，形成持续更新的养车看板。",
+                trailing = {
+                    RoadMemoSecondaryButton(
+                        text = "车辆",
+                        onClick = onOpenVehicles,
+                    )
+                },
+            )
+        }
+
+        item {
+            HomeHeroCard(
+                appTitle = uiState.title,
+                vehicleTitle = uiState.vehicleTitle,
+                reminderCount = uiState.upcomingReminderTexts.size,
+                isEmpty = uiState.isEmpty,
+                onOpenVehicles = onOpenVehicles,
+                onOpenReminders = onOpenReminders,
+            )
         }
 
         item {
             Card(
+                shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                 ),
@@ -79,43 +100,37 @@ fun HomeScreen(
                     )
                     Text(
                         text = uiState.monthlyTotalText,
-                        style = MaterialTheme.typography.displaySmall,
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Text(
                         text = if (uiState.isEmpty) {
-                            "还没有记录数据，下一步可以先添加第一辆车和第一条记录。"
+                            "先补一辆车和第一条记录，首页就会开始形成你的月度账本。"
                         } else {
-                            "默认按当前车辆统计，本月数据会随车辆切换同步刷新。"
+                            "默认按当前车辆统计，本月数据会随着切车和新记录实时刷新。"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
                     )
                     if (uiState.isEmpty) {
-                        Button(onClick = onOpenVehicles) {
-                            Text("添加第一辆车")
-                        }
+                        RoadMemoSecondaryButton(
+                            text = "添加第一辆车",
+                            onClick = onOpenVehicles,
+                        )
                     } else {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             item {
-                                FilledTonalButton(onClick = onAddEnergyRecord) {
-                                    Text("新增能源")
-                                }
+                                QuickActionPill(label = "能源", onClick = onAddEnergyRecord)
                             }
                             item {
-                                FilledTonalButton(onClick = onAddMaintenanceRecord) {
-                                    Text("新增保养")
-                                }
+                                QuickActionPill(label = "保养", onClick = onAddMaintenanceRecord)
                             }
                             item {
-                                FilledTonalButton(onClick = onAddExpenseRecord) {
-                                    Text("新增费用")
-                                }
+                                QuickActionPill(label = "费用", onClick = onAddExpenseRecord)
                             }
                             item {
-                                FilledTonalButton(onClick = onAddRenewalRecord) {
-                                    Text("新增续期")
-                                }
+                                QuickActionPill(label = "续期", onClick = onAddRenewalRecord)
                             }
                         }
                     }
@@ -124,19 +139,11 @@ fun HomeScreen(
         }
 
         item {
-            RoadMemoSection(title = "分类摘要") {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                RoadMemoListSectionHeader(title = "本月构成")
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     uiState.summaryItems.forEach { item ->
-                        item {
-                            AssistChip(
-                                onClick = {},
-                                label = { Text(item) },
-                                colors = AssistChipDefaults.assistChipColors(),
-                            )
-                        }
+                        item { SummaryMetricCard(text = item) }
                     }
                 }
             }
@@ -173,13 +180,108 @@ fun HomeScreen(
                             )
                         }
                     }
-                    FilledTonalButton(onClick = onOpenReminders) {
-                        Text("查看全部提醒")
-                    }
+                    RoadMemoSecondaryButton(
+                        text = "查看全部提醒",
+                        onClick = onOpenReminders,
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HomeHeroCard(
+    appTitle: String,
+    vehicleTitle: String,
+    reminderCount: Int,
+    isEmpty: Boolean,
+    onOpenVehicles: () -> Unit,
+    onOpenReminders: () -> Unit,
+) {
+    RoadMemoHeroSurface {
+        Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = appTitle,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White.copy(alpha = 0.85f),
+                        )
+                        Text(
+                            text = "当前车辆",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.72f),
+                        )
+                        Text(
+                            text = vehicleTitle,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    RoadMemoSecondaryButton(
+                        text = if (reminderCount == 0) "提醒" else "$reminderCount 条",
+                        onClick = onOpenReminders,
+                        icon = Icons.Outlined.NotificationsNone,
+                    )
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeroInfoChip(
+                        icon = Icons.Outlined.Timelapse,
+                        text = if (isEmpty) "先开始记第一笔" else "本月持续记账中",
+                    )
+                    RoadMemoSecondaryButton(
+                        text = if (isEmpty) "添加车辆" else "切换默认车辆",
+                        onClick = onOpenVehicles,
+                        icon = Icons.Outlined.Add,
+                    )
+                }
+            }
+    }
+}
+
+@Composable
+private fun HeroInfoChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+) {
+    RoadMemoHeroPill(
+        text = text,
+        leading = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier.size(16.dp),
+            )
+        },
+    )
+}
+
+@Composable
+private fun QuickActionPill(
+    label: String,
+    onClick: () -> Unit,
+) {
+    RoadMemoSecondaryButton(
+        text = "新增$label",
+        onClick = onClick,
+        icon = Icons.Outlined.Add,
+    )
+}
+
+@Composable
+private fun SummaryMetricCard(text: String) {
+    RoadMemoMetricCard(text = text)
 }
 
 @Composable

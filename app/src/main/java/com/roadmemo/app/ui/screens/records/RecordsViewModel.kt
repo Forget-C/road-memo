@@ -27,7 +27,10 @@ import kotlinx.coroutines.flow.stateIn
 
 data class RecordListItem(
     val id: Long,
-    val text: String,
+    val typeLabel: String,
+    val title: String,
+    val subtitle: String,
+    val amountText: String,
 )
 
 data class RecordsUiState(
@@ -99,25 +102,37 @@ private fun Vehicle.toRecordsUiState(
         }
         RecordListItem(
             id = record.id,
-            text = "${record.occurredAt.toDateTimeText()} / $quantityText / ${record.totalCost.toCurrencyText()} / 里程 ${record.odometerKm}",
+            typeLabel = if (record.detail.energyType.name == "FUEL") "能源 · 加油" else "能源 · 充电",
+            title = quantityText,
+            subtitle = "${record.occurredAt.toDateTimeText()} · 里程 ${record.odometerKm}",
+            amountText = record.totalCost.toCurrencyText(),
         )
     },
     maintenanceRecords = maintenance.map { record ->
         RecordListItem(
             id = record.id,
-            text = "${record.occurredAt.toDateText()} / ${record.maintenanceType.name} / ${record.amount.toCurrencyText()}",
+            typeLabel = "保养",
+            title = record.maintenanceType.name,
+            subtitle = "${record.occurredAt.toDateText()}${record.storeName?.let { " · $it" }.orEmpty()}",
+            amountText = record.amount.toCurrencyText(),
         )
     },
     expenseRecords = expense.map { record ->
         RecordListItem(
             id = record.id,
-            text = "${record.occurredAt.toDateText()} / ${record.category.name} / ${record.amount.toCurrencyText()}",
+            typeLabel = "费用",
+            title = record.category.name,
+            subtitle = "${record.occurredAt.toDateText()}${record.note?.takeIf { it.isNotBlank() }?.let { " · $it" }.orEmpty()}",
+            amountText = record.amount.toCurrencyText(),
         )
     },
     renewalRecords = renewal.map { record ->
         RecordListItem(
             id = record.id,
-            text = "${record.type.name} / 到期 ${record.validUntil} / ${record.amount.toCurrencyText()}",
+            typeLabel = "续期",
+            title = record.type.name,
+            subtitle = "到期 ${record.validUntil}${record.providerName?.let { " · $it" }.orEmpty()}",
+            amountText = record.amount.toCurrencyText(),
         )
     },
     isEmpty = energy.isEmpty() && maintenance.isEmpty() && expense.isEmpty() && renewal.isEmpty(),

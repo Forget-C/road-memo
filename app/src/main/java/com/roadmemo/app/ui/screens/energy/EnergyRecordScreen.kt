@@ -3,14 +3,12 @@ package com.roadmemo.app.ui.screens.energy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -20,14 +18,18 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roadmemo.app.domain.model.EnergyType
+import com.roadmemo.app.ui.components.RoadMemoFeedbackMessage
+import com.roadmemo.app.ui.components.RoadMemoFeedbackTone
 import com.roadmemo.app.ui.components.RoadMemoFormHeader
-import com.roadmemo.app.ui.components.RoadMemoInlineError
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
+import com.roadmemo.app.ui.components.RoadMemoTextField
 import com.roadmemo.app.ui.components.RoadMemoVehicleSummaryCard
 
 private val energyTabs = listOf(EnergyType.ELECTRIC.name, EnergyType.FUEL.name)
@@ -41,6 +43,13 @@ fun EnergyRecordScreen(
     var selectedTabIndex by remember(uiState.form.energyType) {
         mutableIntStateOf(energyTabs.indexOf(uiState.form.energyType).coerceAtLeast(0))
     }
+    val odometerError = uiState.errorMessage.takeIf { it == "请输入有效里程" }
+    val quantityError = uiState.errorMessage.takeIf {
+        it == "请输入有效电量" || it == "请输入有效油量"
+    }
+    val amountError = uiState.errorMessage.takeIf { it == "请输入有效金额" }
+    val fuelLabelError = uiState.errorMessage.takeIf { it == "请输入油号" }
+    val chargeModeError = uiState.errorMessage.takeIf { it == "请输入充电方式" }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -81,28 +90,36 @@ fun EnergyRecordScreen(
                         }
                     }
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.odometerKm,
                         onValueChange = viewModel::updateOdometer,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("里程（km）") },
+                        label = "里程（km）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Number,
+                        isError = odometerError != null,
+                        supportingText = odometerError,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.quantityText,
                         onValueChange = viewModel::updateQuantity,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = {
-                            Text(if (uiState.form.energyType == EnergyType.ELECTRIC.name) "电量（kWh）" else "油量（L）")
+                        label = if (uiState.form.energyType == EnergyType.ELECTRIC.name) {
+                            "电量（kWh）"
+                        } else {
+                            "油量（L）"
                         },
                         singleLine = true,
+                        keyboardType = KeyboardType.Decimal,
+                        isError = quantityError != null,
+                        supportingText = quantityError,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.amountText,
                         onValueChange = viewModel::updateAmount,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("总金额（元）") },
+                        label = "总金额（元）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Decimal,
+                        isError = amountError != null,
+                        supportingText = amountError,
                     )
                 }
             }
@@ -112,35 +129,39 @@ fun EnergyRecordScreen(
             RoadMemoSection(title = "补能细节") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (uiState.form.energyType == EnergyType.FUEL.name) {
-                        OutlinedTextField(
+                        RoadMemoTextField(
                             value = uiState.form.fuelLabel,
                             onValueChange = viewModel::updateFuelLabel,
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("油号") },
+                            label = "油号",
                             singleLine = true,
+                            keyboardType = KeyboardType.Number,
+                            isError = fuelLabelError != null,
+                            supportingText = fuelLabelError,
                         )
                     } else {
-                        OutlinedTextField(
+                        RoadMemoTextField(
                             value = uiState.form.chargeMode,
                             onValueChange = viewModel::updateChargeMode,
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("充电方式") },
+                            label = "充电方式",
                             singleLine = true,
+                            capitalization = KeyboardCapitalization.Words,
+                            isError = chargeModeError != null,
+                            supportingText = chargeModeError,
                         )
                     }
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.stationName,
                         onValueChange = viewModel::updateStationName,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("站点名称（可选）") },
+                        label = "站点名称（可选）",
                         singleLine = true,
+                        capitalization = KeyboardCapitalization.Words,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.note,
                         onValueChange = viewModel::updateNote,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("备注（可选）") },
+                        label = "备注（可选）",
+                        capitalization = KeyboardCapitalization.Sentences,
                     )
 
                     Card {
@@ -162,13 +183,24 @@ fun EnergyRecordScreen(
         item {
             RoadMemoSection(title = "备注与保存") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    uiState.errorMessage?.let { message ->
-                        RoadMemoInlineError(message = message)
+                    uiState.errorMessage?.takeUnless {
+                        it == odometerError ||
+                            it == quantityError ||
+                            it == amountError ||
+                            it == fuelLabelError ||
+                            it == chargeModeError
+                    }?.let { message ->
+                        RoadMemoFeedbackMessage(
+                            message = message,
+                            tone = RoadMemoFeedbackTone.ERROR,
+                        )
                     }
 
                     RoadMemoSubmitButton(
-                        text = if (uiState.isSaving) "保存中..." else uiState.submitLabel,
-                        enabled = uiState.canSubmit && !uiState.isSaving,
+                        text = uiState.submitLabel,
+                        enabled = uiState.canSubmit,
+                        isLoading = uiState.isSaving,
+                        loadingText = "保存中...",
                         onClick = { viewModel.submit { onComplete?.invoke() } },
                     )
                 }

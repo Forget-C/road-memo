@@ -61,6 +61,7 @@ fun RoadMemoNavHost(
         }
         composable(RoadMemoDestination.Reminders.route) {
             ReminderScreen(
+                onBack = { navController.popBackStack() },
                 onOpenSource = { reminder ->
                     when (reminder.sourceType) {
                         com.roadmemo.app.domain.model.ReminderSourceType.RENEWAL_RECORD -> {

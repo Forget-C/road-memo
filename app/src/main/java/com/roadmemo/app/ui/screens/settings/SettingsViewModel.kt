@@ -21,7 +21,10 @@ data class SettingsUiState(
     val isRestoring: Boolean = false,
     val exportMessage: String? = null,
     val isErrorMessage: Boolean = false,
-)
+) {
+    val isBusy: Boolean
+        get() = isExporting || isBackingUp || isRestoring
+}
 
 sealed interface SettingsEffect {
     data class ShareCsv(val uri: Uri) : SettingsEffect

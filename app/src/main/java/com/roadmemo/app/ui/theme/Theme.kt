@@ -36,6 +36,7 @@ fun RoadMemoTheme(
     MaterialTheme(
         colorScheme = LightColors,
         typography = RoadMemoTypography,
+        shapes = RoadMemoShapes,
         content = content,
     )
 }

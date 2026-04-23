@@ -3,24 +3,26 @@ package com.roadmemo.app.ui.screens.expense
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roadmemo.app.domain.model.ExpenseCategory
+import com.roadmemo.app.ui.components.RoadMemoFeedbackMessage
+import com.roadmemo.app.ui.components.RoadMemoFeedbackTone
 import com.roadmemo.app.ui.components.RoadMemoFormHeader
-import com.roadmemo.app.ui.components.RoadMemoInlineError
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
+import com.roadmemo.app.ui.components.RoadMemoTextField
 import com.roadmemo.app.ui.components.RoadMemoVehicleSummaryCard
 
 private val expenseCategories = listOf(
@@ -40,11 +42,11 @@ fun ExpenseRecordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedTabIndex = expenseCategories.indexOf(uiState.category).coerceAtLeast(0)
+    val amountError = uiState.errorMessage.takeIf { it == "请输入有效金额" }
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .fillMaxWidth(),
+            .fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -75,12 +77,14 @@ fun ExpenseRecordScreen(
                         }
                     }
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.amountText,
                         onValueChange = viewModel::updateAmount,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("金额（元）") },
+                        label = "金额（元）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Decimal,
+                        isError = amountError != null,
+                        supportingText = amountError,
                     )
                 }
             }
@@ -89,21 +93,26 @@ fun ExpenseRecordScreen(
         item {
             RoadMemoSection(title = "备注与保存") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.note,
                         onValueChange = viewModel::updateNote,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("备注（可选）") },
+                        label = "备注（可选）",
                         minLines = 3,
+                        capitalization = KeyboardCapitalization.Sentences,
                     )
 
-                    uiState.errorMessage?.let { message ->
-                        RoadMemoInlineError(message = message)
+                    uiState.errorMessage?.takeUnless { it == amountError }?.let { message ->
+                        RoadMemoFeedbackMessage(
+                            message = message,
+                            tone = RoadMemoFeedbackTone.ERROR,
+                        )
                     }
 
                     RoadMemoSubmitButton(
-                        text = if (uiState.isSaving) "保存中..." else uiState.submitLabel,
-                        enabled = !uiState.isSaving,
+                        text = uiState.submitLabel,
+                        enabled = true,
+                        isLoading = uiState.isSaving,
+                        loadingText = "保存中...",
                         onClick = { viewModel.submit(onComplete) },
                     )
                 }

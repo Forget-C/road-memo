@@ -3,11 +3,9 @@ package com.roadmemo.app.ui.screens.maintenance
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -17,14 +15,19 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roadmemo.app.domain.model.MaintenanceType
 import com.roadmemo.app.ui.components.RoadMemoFormHeader
-import com.roadmemo.app.ui.components.RoadMemoInlineError
+import com.roadmemo.app.ui.components.RoadMemoDateField
+import com.roadmemo.app.ui.components.RoadMemoFeedbackMessage
+import com.roadmemo.app.ui.components.RoadMemoFeedbackTone
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
+import com.roadmemo.app.ui.components.RoadMemoTextField
 import com.roadmemo.app.ui.components.RoadMemoVehicleSummaryCard
 
 private val maintenanceTabs = listOf(
@@ -43,6 +46,12 @@ fun MaintenanceRecordScreen(
     var selectedTabIndex by remember(uiState.form.maintenanceType) {
         mutableIntStateOf(maintenanceTabs.indexOf(uiState.form.maintenanceType).coerceAtLeast(0))
     }
+    val amountError = uiState.errorMessage.takeIf { it == "请输入有效金额" }
+    val odometerError = uiState.errorMessage.takeIf { it == "请输入有效里程" }
+    val nextDueDateError = uiState.errorMessage.takeIf {
+        it == "下次保养日期格式不正确，格式如 2026-12-31"
+    }
+    val nextDueOdometerError = uiState.errorMessage.takeIf { it == "请输入有效的下次保养里程" }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -80,26 +89,30 @@ fun MaintenanceRecordScreen(
                             )
                         }
                     }
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.amountText,
                         onValueChange = viewModel::updateAmount,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("金额（元）") },
+                        label = "金额（元）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Decimal,
+                        isError = amountError != null,
+                        supportingText = amountError,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.odometerKm,
                         onValueChange = viewModel::updateOdometer,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("里程（可选）") },
+                        label = "里程（可选）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Number,
+                        isError = odometerError != null,
+                        supportingText = odometerError,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.storeName,
                         onValueChange = viewModel::updateStoreName,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("门店名称（可选）") },
+                        label = "门店名称（可选）",
                         singleLine = true,
+                        capitalization = KeyboardCapitalization.Words,
                     )
                 }
             }
@@ -108,25 +121,28 @@ fun MaintenanceRecordScreen(
         item {
             RoadMemoSection(title = "下次计划") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
+                    RoadMemoDateField(
                         value = uiState.form.nextDueDateText,
                         onValueChange = viewModel::updateNextDueDate,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("下次保养日期（YYYY-MM-DD，可选）") },
-                        singleLine = true,
+                        label = "下次保养日期（YYYY-MM-DD，可选）",
+                        placeholder = "例如 2026-05-01",
+                        supportingText = nextDueDateError ?: "点击选择日期，便于后续提醒",
+                        isError = nextDueDateError != null,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.nextDueOdometerKm,
                         onValueChange = viewModel::updateNextDueOdometer,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("下次保养里程（可选）") },
+                        label = "下次保养里程（可选）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Number,
+                        isError = nextDueOdometerError != null,
+                        supportingText = nextDueOdometerError,
                     )
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.form.note,
                         onValueChange = viewModel::updateNote,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("备注（可选）") },
+                        label = "备注（可选）",
+                        capitalization = KeyboardCapitalization.Sentences,
                     )
                 }
             }
@@ -135,12 +151,22 @@ fun MaintenanceRecordScreen(
         item {
             RoadMemoSection(title = "保存") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    uiState.errorMessage?.let { message ->
-                        RoadMemoInlineError(message = message)
+                    uiState.errorMessage?.takeUnless {
+                        it == amountError ||
+                            it == odometerError ||
+                            it == nextDueDateError ||
+                            it == nextDueOdometerError
+                    }?.let { message ->
+                        RoadMemoFeedbackMessage(
+                            message = message,
+                            tone = RoadMemoFeedbackTone.ERROR,
+                        )
                     }
                     RoadMemoSubmitButton(
-                        text = if (uiState.isSaving) "保存中..." else uiState.submitLabel,
-                        enabled = uiState.canSubmit && !uiState.isSaving,
+                        text = uiState.submitLabel,
+                        enabled = uiState.canSubmit,
+                        isLoading = uiState.isSaving,
+                        loadingText = "保存中...",
                         onClick = { viewModel.submit { onComplete?.invoke() } },
                     )
                 }

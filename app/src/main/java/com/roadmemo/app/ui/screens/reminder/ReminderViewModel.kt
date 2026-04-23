@@ -22,6 +22,7 @@ data class ReminderListItem(
     val id: Long,
     val title: String,
     val subtitle: String,
+    val badgeText: String,
     val sourceType: ReminderSourceType?,
     val sourceId: Long?,
 )
@@ -87,6 +88,12 @@ private fun Reminder.toListItem(): ReminderListItem {
             "等待处理"
         } else {
             "提醒时间 $remindDate"
+        },
+        badgeText = when (sourceType) {
+            ReminderSourceType.RENEWAL_RECORD -> "续期提醒"
+            ReminderSourceType.MAINTENANCE_RECORD -> "保养提醒"
+            ReminderSourceType.MANUAL -> "手动提醒"
+            null -> "待处理"
         },
         sourceType = sourceType,
         sourceId = sourceId,

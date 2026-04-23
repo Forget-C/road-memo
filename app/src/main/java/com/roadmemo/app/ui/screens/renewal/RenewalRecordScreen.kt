@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -18,14 +15,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roadmemo.app.domain.model.RenewalType
+import com.roadmemo.app.ui.components.RoadMemoDateField
+import com.roadmemo.app.ui.components.RoadMemoFeedbackMessage
+import com.roadmemo.app.ui.components.RoadMemoFeedbackTone
 import com.roadmemo.app.ui.components.RoadMemoFormHeader
-import com.roadmemo.app.ui.components.RoadMemoInlineError
 import com.roadmemo.app.ui.components.RoadMemoSection
 import com.roadmemo.app.ui.components.RoadMemoSubmitButton
+import com.roadmemo.app.ui.components.RoadMemoTextField
 import com.roadmemo.app.ui.components.RoadMemoVehicleSummaryCard
 
 private val renewalTypes = listOf(
@@ -42,6 +44,13 @@ fun RenewalRecordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedTabIndex = renewalTypes.indexOf(uiState.renewalType).coerceAtLeast(0)
+    val amountError = uiState.errorMessage.takeIf { it == "请输入有效金额" }
+    val validUntilError = uiState.errorMessage.takeIf {
+        it == "请输入有效的到期日期，格式如 2026-12-31"
+    }
+    val validFromError = uiState.errorMessage.takeIf {
+        it == "生效日期格式不正确，格式如 2026-01-01"
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -76,44 +85,48 @@ fun RenewalRecordScreen(
                         }
                     }
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.providerName,
                         onValueChange = viewModel::updateProviderName,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("机构 / 服务方") },
+                        label = "机构 / 服务方",
                         singleLine = true,
+                        capitalization = KeyboardCapitalization.Words,
                     )
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.policyNumber,
                         onValueChange = viewModel::updatePolicyNumber,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("保单号 / 业务编号（可选）") },
+                        label = "保单号 / 业务编号（可选）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Ascii,
                     )
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.amountText,
                         onValueChange = viewModel::updateAmount,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("金额（元）") },
+                        label = "金额（元）",
                         singleLine = true,
+                        keyboardType = KeyboardType.Decimal,
+                        isError = amountError != null,
+                        supportingText = amountError,
                     )
 
-                    OutlinedTextField(
+                    RoadMemoDateField(
                         value = uiState.validFromText,
                         onValueChange = viewModel::updateValidFrom,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("生效日期（YYYY-MM-DD，可选）") },
-                        singleLine = true,
+                        label = "生效日期（YYYY-MM-DD，可选）",
+                        placeholder = "例如 2026-05-01",
+                        supportingText = validFromError ?: "可点击选择，默认只跟踪到期日期",
+                        isError = validFromError != null,
                     )
 
-                    OutlinedTextField(
+                    RoadMemoDateField(
                         value = uiState.validUntilText,
                         onValueChange = viewModel::updateValidUntil,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("到期日期（YYYY-MM-DD）") },
-                        singleLine = true,
+                        label = "到期日期（YYYY-MM-DD）",
+                        placeholder = "例如 2027-05-01",
+                        supportingText = validUntilError ?: "点击选择日期，这是提醒判断的主要日期",
+                        isError = validUntilError != null,
                     )
                 }
             }
@@ -147,21 +160,28 @@ fun RenewalRecordScreen(
                         )
                     }
 
-                    OutlinedTextField(
+                    RoadMemoTextField(
                         value = uiState.note,
                         onValueChange = viewModel::updateNote,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("备注（可选）") },
+                        label = "备注（可选）",
                         minLines = 3,
+                        capitalization = KeyboardCapitalization.Sentences,
                     )
 
-                    uiState.errorMessage?.let { message ->
-                        RoadMemoInlineError(message = message)
+                    uiState.errorMessage?.takeUnless {
+                        it == amountError || it == validFromError || it == validUntilError
+                    }?.let { message ->
+                        RoadMemoFeedbackMessage(
+                            message = message,
+                            tone = RoadMemoFeedbackTone.ERROR,
+                        )
                     }
 
                     RoadMemoSubmitButton(
-                        text = if (uiState.isSaving) "保存中..." else uiState.submitLabel,
-                        enabled = !uiState.isSaving,
+                        text = uiState.submitLabel,
+                        enabled = true,
+                        isLoading = uiState.isSaving,
+                        loadingText = "保存中...",
                         onClick = { viewModel.submit(onComplete) },
                     )
                 }

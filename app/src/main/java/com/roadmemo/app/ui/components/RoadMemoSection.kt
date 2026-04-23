@@ -10,7 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.roadmemo.app.ui.theme.RoadMemoSpacing
 
 @Composable
 fun RoadMemoSection(
@@ -20,13 +20,14 @@ fun RoadMemoSection(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(RoadMemoSpacing.xLarge),
+            verticalArrangement = Arrangement.spacedBy(RoadMemoSpacing.medium),
         ) {
             Text(
                 text = title,
