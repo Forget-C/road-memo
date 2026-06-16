@@ -157,8 +157,8 @@ private fun Vehicle.toHomeUiState(
             "续期 ${com.roadmemo.app.domain.model.Money(renewalTotal).toCurrencyText()}",
         ),
         consumptionItems = buildList {
-            consumptionSummary.fuel.latestText?.let { add("最近油耗" to it) }
-            consumptionSummary.electric.latestText?.let { add("最近电耗" to it) }
+            consumptionSummary.fuel?.latestText?.let { add("最近油耗" to it) }
+            consumptionSummary.electric?.latestText?.let { add("最近电耗" to it) }
         },
         hasEnergyRecords = energyRecords.isNotEmpty(),
         recentEnergyText = latestEnergy?.let { record ->
