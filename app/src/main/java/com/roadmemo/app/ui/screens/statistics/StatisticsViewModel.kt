@@ -2,6 +2,7 @@ package com.roadmemo.app.ui.screens.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roadmemo.app.domain.EnergyConsumptionCalculator
 import com.roadmemo.app.domain.model.EnergyRecord
 import com.roadmemo.app.domain.model.ExpenseRecord
 import com.roadmemo.app.domain.model.MaintenanceRecord
@@ -31,6 +32,7 @@ data class StatisticsUiState(
     val vehicleSummary: String = "暂无默认车辆",
     val monthlyTotalText: String = "¥0.00",
     val monthlyBreakdownText: String = "暂无记录",
+    val consumptionSummaryItems: List<Pair<String, String>> = emptyList(),
     val monthTrendItems: List<String> = emptyList(),
     val categorySummaryItems: List<String> = emptyList(),
     val recordCountText: String = "共 0 条记录",
@@ -46,6 +48,7 @@ class StatisticsViewModel @Inject constructor(
     private val maintenanceRepository: MaintenanceRepository,
     private val expenseRepository: ExpenseRepository,
     private val renewalRepository: RenewalRepository,
+    private val energyConsumptionCalculator: EnergyConsumptionCalculator,
 ) : ViewModel() {
 
     val uiState = vehicleRepository.observeDefaultVehicle().flatMapLatest { vehicle ->
@@ -63,6 +66,7 @@ class StatisticsViewModel @Inject constructor(
                     maintenance = maintenance,
                     expense = expense,
                     renewal = renewal,
+                    energyConsumptionCalculator = energyConsumptionCalculator,
                 )
             }
         }
@@ -78,7 +82,9 @@ private fun Vehicle.toStatisticsUiState(
     maintenance: List<MaintenanceRecord>,
     expense: List<ExpenseRecord>,
     renewal: List<RenewalRecord>,
+    energyConsumptionCalculator: EnergyConsumptionCalculator,
 ): StatisticsUiState {
+    val consumptionSummary = energyConsumptionCalculator.calculate(energy)
     val currentMonth = YearMonth.now()
     val energyTotal = energy.sumOfMonth(currentMonth) { it.occurredAt.toEpochMilli() to it.totalCost.amountInCent }
     val maintenanceTotal = maintenance.sumOfMonth(currentMonth) { it.occurredAt.toEpochMilli() to it.amount.amountInCent }
@@ -101,6 +107,13 @@ private fun Vehicle.toStatisticsUiState(
         add("保养 / ${Money(maintenance.sumOf { it.amount.amountInCent }).toCurrencyText()} / ${maintenance.size} 条")
         add("费用 / ${Money(expense.sumOf { it.amount.amountInCent }).toCurrencyText()} / ${expense.size} 条")
         add("续期 / ${Money(renewal.sumOf { it.amount.amountInCent }).toCurrencyText()} / ${renewal.size} 条")
+    }
+
+    val consumptionSummaryItems = buildList {
+        consumptionSummary.fuel?.latestText?.let { add("最近油耗" to it) }
+        consumptionSummary.fuel?.averageText?.let { add("平均油耗" to it) }
+        consumptionSummary.electric?.latestText?.let { add("最近电耗" to it) }
+        consumptionSummary.electric?.averageText?.let { add("平均电耗" to it) }
     }
 
     val recentHighlights = buildList {
@@ -132,6 +145,7 @@ private fun Vehicle.toStatisticsUiState(
         },
         monthlyTotalText = Money(total).toCurrencyText(),
         monthlyBreakdownText = "能源 ${Money(energyTotal).toCurrencyText()} · 保养 ${Money(maintenanceTotal).toCurrencyText()} · 费用 ${Money(expenseTotal).toCurrencyText()} · 续期 ${Money(renewalTotal).toCurrencyText()}",
+        consumptionSummaryItems = consumptionSummaryItems,
         monthTrendItems = monthTrendItems,
         categorySummaryItems = categorySummaryItems,
         recordCountText = "共 ${energy.size + maintenance.size + expense.size + renewal.size} 条记录，其中能源 ${energy.size}、保养 ${maintenance.size}、费用 ${expense.size}、续期 ${renewal.size}",

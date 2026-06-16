@@ -479,6 +479,7 @@ RoadMemo 当前 UI 风格冻结为：
 - `docs/architecture/roadmemo-v0.1-ui-optimization-plan.md`
 - `docs/architecture/roadmemo-v0.1-design-system-v1.md`
 - `docs/architecture/roadmemo-v0.1-flat-design-guideline.md`
+- `docs/architecture/roadmemo-v0.1-consumption-feature-plan.md`
 
 ---
 

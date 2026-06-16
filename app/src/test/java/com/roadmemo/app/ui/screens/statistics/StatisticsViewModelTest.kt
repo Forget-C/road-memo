@@ -1,9 +1,11 @@
 package com.roadmemo.app.ui.screens.statistics
 
 import com.roadmemo.app.MainDispatcherRule
+import com.roadmemo.app.domain.EnergyConsumptionCalculator
 import com.roadmemo.app.domain.model.ChargeMode
 import com.roadmemo.app.domain.model.ElectricEnergyDetail
 import com.roadmemo.app.domain.model.EnergyRecord
+import com.roadmemo.app.domain.model.FuelEnergyDetail
 import com.roadmemo.app.domain.model.ExpenseCategory
 import com.roadmemo.app.domain.model.ExpenseRecord
 import com.roadmemo.app.domain.model.MaintenanceRecord
@@ -47,6 +49,7 @@ class StatisticsViewModelTest {
             maintenanceRepository = FakeMaintenanceRepository(),
             expenseRepository = FakeExpenseRepository(),
             renewalRepository = FakeRenewalRepository(),
+            energyConsumptionCalculator = EnergyConsumptionCalculator(),
         )
         val collector = backgroundScope.launch { viewModel.uiState.collect {} }
         advanceUntilIdle()
@@ -67,24 +70,27 @@ class StatisticsViewModelTest {
 
         val viewModel = StatisticsViewModel(
             vehicleRepository = FakeVehicleRepository(vehicle),
-            energyRepository = FakeEnergyRepository(records = listOf(energy)),
+            energyRepository = FakeEnergyRepository(records = energy),
             maintenanceRepository = FakeMaintenanceRepository(records = listOf(maintenance)),
             expenseRepository = FakeExpenseRepository(records = listOf(expense)),
             renewalRepository = FakeRenewalRepository(records = listOf(renewal)),
+            energyConsumptionCalculator = EnergyConsumptionCalculator(),
         )
         val collector = backgroundScope.launch { viewModel.uiState.collect {} }
         advanceUntilIdle()
 
         val uiState = viewModel.uiState.value
         assertEquals("本田 思域 · 沪D12345", uiState.vehicleSummary)
-        assertEquals("¥468.00", uiState.monthlyTotalText)
+        assertEquals("¥606.00", uiState.monthlyTotalText)
         assertEquals(
-            "能源 ¥48.00 · 保养 ¥320.00 · 费用 ¥50.00 · 续期 ¥50.00",
+            "能源 ¥186.00 · 保养 ¥320.00 · 费用 ¥50.00 · 续期 ¥50.00",
             uiState.monthlyBreakdownText,
         )
-        assertTrue(uiState.categorySummaryItems.any { it.contains("能源 / ¥48.00 / 1 条") })
-        assertEquals("共 4 条记录，其中能源 1、保养 1、费用 1、续期 1", uiState.recordCountText)
+        assertTrue(uiState.categorySummaryItems.any { it.contains("能源 / ¥186.00 / 4 条") })
+        assertEquals("共 7 条记录，其中能源 4、保养 1、费用 1、续期 1", uiState.recordCountText)
         assertEquals(6, uiState.monthTrendItems.size)
+        assertTrue(uiState.consumptionSummaryItems.any { it.first == "最近油耗" && it.second == "6.0 L/100km" })
+        assertTrue(uiState.consumptionSummaryItems.any { it.first == "平均电耗" && it.second == "15.0 kWh/100km" })
         assertTrue(uiState.recentHighlights.any { it.contains("最近补能") })
         assertTrue(uiState.recentHighlights.any { it.contains("最近到期") })
         collector.cancel()
@@ -234,21 +240,71 @@ private fun sampleStatisticsVehicle(): Vehicle = Vehicle(
     updatedAt = Instant.EPOCH,
 )
 
-private fun sampleStatisticsEnergy(month: YearMonth): EnergyRecord = EnergyRecord(
-    id = 1L,
-    vehicleId = 1L,
-    occurredAt = statisticsMonthInstant(month, 3),
-    odometerKm = 8000,
-    totalCost = Money(4800L),
-    detail = ElectricEnergyDetail(
-        quantityInThousandth = 30000L,
-        isFull = true,
-        stationName = "站点 A",
-        chargeMode = ChargeMode.PUBLIC_DC,
+private fun sampleStatisticsEnergy(month: YearMonth): List<EnergyRecord> = listOf(
+    EnergyRecord(
+        id = 1L,
+        vehicleId = 1L,
+        occurredAt = statisticsMonthInstant(month, 2),
+        odometerKm = 7600,
+        totalCost = Money(4200L),
+        detail = FuelEnergyDetail(
+            quantityInThousandth = 35000L,
+            isFull = true,
+            stationName = "油站 A",
+            fuelLabel = "95",
+        ),
+        note = null,
+        createdAt = Instant.EPOCH,
+        updatedAt = Instant.EPOCH,
     ),
-    note = null,
-    createdAt = Instant.EPOCH,
-    updatedAt = Instant.EPOCH,
+    EnergyRecord(
+        id = 2L,
+        vehicleId = 1L,
+        occurredAt = statisticsMonthInstant(month, 3),
+        odometerKm = 8100,
+        totalCost = Money(3600L),
+        detail = FuelEnergyDetail(
+            quantityInThousandth = 30000L,
+            isFull = true,
+            stationName = "油站 B",
+            fuelLabel = "95",
+        ),
+        note = null,
+        createdAt = Instant.EPOCH,
+        updatedAt = Instant.EPOCH,
+    ),
+    EnergyRecord(
+        id = 3L,
+        vehicleId = 1L,
+        occurredAt = statisticsMonthInstant(month, 4),
+        odometerKm = 8000,
+        totalCost = Money(4800L),
+        detail = ElectricEnergyDetail(
+            quantityInThousandth = 30000L,
+            isFull = true,
+            stationName = "站点 A",
+            chargeMode = ChargeMode.PUBLIC_DC,
+        ),
+        note = null,
+        createdAt = Instant.EPOCH,
+        updatedAt = Instant.EPOCH,
+    ),
+    EnergyRecord(
+        id = 4L,
+        vehicleId = 1L,
+        occurredAt = statisticsMonthInstant(month, 6),
+        odometerKm = 8400,
+        totalCost = Money(6000L),
+        detail = ElectricEnergyDetail(
+            quantityInThousandth = 60000L,
+            isFull = true,
+            stationName = "站点 B",
+            chargeMode = ChargeMode.PUBLIC_DC,
+        ),
+        note = null,
+        createdAt = Instant.EPOCH,
+        updatedAt = Instant.EPOCH,
+    ),
 )
 
 private fun sampleStatisticsMaintenance(month: YearMonth): MaintenanceRecord = MaintenanceRecord(

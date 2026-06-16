@@ -118,6 +118,42 @@ fun StatisticsScreen(
         }
 
         item {
+            RoadMemoSection(title = "能耗表现") {
+                if (uiState.isLoading) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        RoadMemoSkeletonBlock(
+                            height = 92.dp,
+                            modifier = Modifier.weight(1f),
+                        )
+                        RoadMemoSkeletonBlock(
+                            height = 92.dp,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                } else if (uiState.consumptionSummaryItems.isEmpty()) {
+                    RoadMemoEmptyListState(
+                        title = "暂无有效能耗",
+                        description = "形成两次满补闭环后，这里会显示最近和平均油耗或电耗。",
+                        icon = RoadMemoIcons.Analytics,
+                    )
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(uiState.consumptionSummaryItems) { item ->
+                            MiniStatCard(
+                                modifier = Modifier.width(164.dp),
+                                title = item.first,
+                                value = item.second,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
             RoadMemoSection(title = "近 6 个月趋势") {
                 if (uiState.isLoading) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

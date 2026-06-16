@@ -2,6 +2,7 @@ package com.roadmemo.app.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roadmemo.app.domain.EnergyConsumptionCalculator
 import com.roadmemo.app.domain.model.EnergyRecord
 import com.roadmemo.app.domain.model.ExpenseRecord
 import com.roadmemo.app.domain.model.MaintenanceRecord
@@ -35,6 +36,8 @@ data class HomeUiState(
     val vehicleTitle: String = "暂无默认车辆",
     val monthlyTotalText: String = "¥0.00",
     val summaryItems: List<String> = emptyList(),
+    val consumptionItems: List<Pair<String, String>> = emptyList(),
+    val hasEnergyRecords: Boolean = false,
     val recentEnergyText: String? = null,
     val recentMaintenanceText: String? = null,
     val upcomingReminderTexts: List<String> = emptyList(),
@@ -51,6 +54,7 @@ class HomeViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository,
     private val renewalRepository: RenewalRepository,
     private val reminderRepository: ReminderRepository,
+    private val energyConsumptionCalculator: EnergyConsumptionCalculator,
 ) : ViewModel() {
 
     private val defaultVehicle: Flow<Vehicle?> = vehicleRepository.observeDefaultVehicle()
@@ -93,6 +97,7 @@ class HomeViewModel @Inject constructor(
                     expenseRecords = secondary.expenseRecords,
                     renewalRecords = secondary.renewalRecords,
                     reminders = secondary.reminders,
+                    calculator = energyConsumptionCalculator,
                 )
             }
         }
@@ -124,6 +129,7 @@ private fun Vehicle.toHomeUiState(
     expenseRecords: List<ExpenseRecord>,
     renewalRecords: List<RenewalRecord>,
     reminders: List<Reminder>,
+    calculator: EnergyConsumptionCalculator,
 ): HomeUiState {
     val currentMonth = YearMonth.now()
     val energyTotal = energyRecords.sumOfMonth(currentMonth) { it.occurredAt.toEpochMilli() to it.totalCost.amountInCent }
@@ -131,6 +137,7 @@ private fun Vehicle.toHomeUiState(
     val expenseTotal = expenseRecords.sumOfMonth(currentMonth) { it.occurredAt.toEpochMilli() to it.amount.amountInCent }
     val renewalTotal = renewalRecords.sumOfMonth(currentMonth) { it.createdAt.toEpochMilli() to it.amount.amountInCent }
     val total = energyTotal + maintenanceTotal + expenseTotal + renewalTotal
+    val consumptionSummary = calculator.calculate(energyRecords)
 
     return HomeUiState(
         vehicleTitle = buildString {
@@ -149,6 +156,11 @@ private fun Vehicle.toHomeUiState(
             "费用 ${com.roadmemo.app.domain.model.Money(expenseTotal).toCurrencyText()}",
             "续期 ${com.roadmemo.app.domain.model.Money(renewalTotal).toCurrencyText()}",
         ),
+        consumptionItems = buildList {
+            consumptionSummary.fuel.latestText?.let { add("最近油耗" to it) }
+            consumptionSummary.electric.latestText?.let { add("最近电耗" to it) }
+        },
+        hasEnergyRecords = energyRecords.isNotEmpty(),
         recentEnergyText = latestEnergy?.let { record ->
             val quantityText = if (record.detail.energyType.name == "FUEL") {
                 "${record.detail.quantityInThousandth / 1000.0} L"
