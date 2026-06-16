@@ -1,161 +1,132 @@
-# RoadMemo · 长路有记
+<p align="center">
+  <img src="docs/assets/roadmemo-app-icon-v1.png" alt="RoadMemo" width="120" />
+</p>
 
-一款面向车主的 Android 本地记账 App，用来记录车辆能源、保养、
-费用和续期事项，并提供首页摘要、提醒和基础统计。
+<h1 align="center">RoadMemo · 长路有记</h1>
 
-当前仓库对应 `V0.1 / 0.1.0` MVP 阶段。
+<p align="center">
+  <strong>本地优先 · 隐私至上 · 开源 Android 车主记账</strong>
+</p>
 
-当前阶段状态：
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1.0-teal" alt="Version" />
+  <img src="https://img.shields.io/badge/minSdk-26-green" alt="Min SDK" />
+  <img src="https://img.shields.io/badge/targetSdk-36-blue" alt="Target SDK" />
+  <img src="https://img.shields.io/badge/license-MIT-orange" alt="License" />
+</p>
 
-- `主线功能开发：已完成`
-- `当前阶段：收尾优化 / 验收 / 内测准备`
+---
 
-本阶段重点：
+## 关于
 
-- 多能源车型支持：汽油 / 柴油 / 油混 / 插混 / 纯电
-- 本地优先：不依赖登录，不依赖云端
-- 快速记录：能源 / 保养 / 费用 / 续期四类主链路
-- 数据可迁移：CSV 导出、JSON 备份与恢复
+RoadMemo 是一款专注**车辆全生命周期记账**的 Android 应用。记录加油、充电、保养、费用和续期事项，提供首页摘要、智能提醒和基础统计——全部数据存储在本地，无需登录，无需联网。
 
-## 当前能力
+> 当前为 `V0.1` MVP 阶段，主线功能已开发完成，进入收尾优化与内测准备。
 
-当前已经落地的核心功能：
+### 设计原则
 
-- 车辆管理
-  - 新增车辆
-  - 默认车辆切换
-  - 车辆动力类型管理
-- 能源记录
-  - 新增 / 编辑 / 删除
-  - 支持加油和充电
-- 保养记录
-  - 新增 / 编辑 / 删除
-  - 支持下次保养日期 / 里程
-- 费用记录
-  - 新增 / 编辑 / 删除
-- 续期事项
-  - 新增 / 编辑 / 删除
-  - 自动生成提醒来源
-- 提醒系统
-  - 查看提醒
-  - 标记已处理
-  - 忽略
-  - 跳回来源记录
-- 首页与统计
-  - 本月摘要
-  - 最近记录
-  - 分类汇总
-  - 最近 6 个月趋势
-  - 最近 / 平均油耗、电耗
-- 数据能力
-  - CSV 导出
-  - JSON 完整备份
-  - 备份恢复覆盖
+- **本地优先** — 所有数据存储在设备上，不上传任何服务器
+- **隐私至上** — 无需账号，无需登录，你的数据只属于你
+- **数据可迁移** — 支持 CSV 导出与 JSON 完整备份恢复
+- **多能源车型** — 汽油 / 柴油 / 油混 / 插混 / 纯电，一车一档
+
+## 功能
+
+| 模块 | 能力 |
+|------|------|
+| 车辆管理 | 新增车辆、默认车辆切换、动力类型管理 |
+| 能源记录 | 加油 / 充电记录，支持新增、编辑、删除 |
+| 保养记录 | 保养记录管理，下次保养日期 / 里程提醒 |
+| 费用记录 | 过路费、停车费、保险等杂项费用管理 |
+| 续期事项 | 年检、保险续期管理，自动生成提醒 |
+| 提醒系统 | 查看提醒、标记已处理、忽略、跳回来源记录 |
+| 首页摘要 | 本月费用汇总、最近记录、油耗 / 电耗概览 |
+| 统计分析 | 分类汇总、近 6 个月趋势、能耗表现 |
+| 数据能力 | CSV 导出、JSON 完整备份与恢复 |
+
+## 截图
+
+> TODO: 补充应用截图
 
 ## 技术栈
 
-- Kotlin
-- Jetpack Compose
-- Navigation Compose
-- Room
-- Hilt
-- DataStore
-- WorkManager
-- Coroutines + Flow
+| 类别 | 技术 |
+|------|------|
+| 语言 | Kotlin |
+| UI | Jetpack Compose + Navigation Compose |
+| 数据库 | Room |
+| DI | Hilt |
+| 存储 | DataStore |
+| 后台 | WorkManager |
+| 异步 | Coroutines + Flow |
 
 ## 运行环境
 
-- Android `minSdk 26`
-- `compileSdk 36`
-- `targetSdk 36`
-- Java 17
-
-版本信息见：
-
-- [app/build.gradle.kts](/Users/extreme/Projects/github.com/road-memo/app/build.gradle.kts)
+- **minSdk**: 26 (Android 8.0)
+- **compileSdk / targetSdk**: 36
+- **Java**: 17
 
 ## 本地构建
 
-在项目根目录执行：
-
 ```bash
+# 克隆仓库
+git clone https://github.com/road-memo/road-memo.git
+cd road-memo
+
+# 构建 Debug APK
 GRADLE_USER_HOME=$PWD/.gradle-home ./gradlew --no-configuration-cache :app:assembleDebug
 ```
 
-当前调试包输出位置：
-
-- [app-debug.apk](/Users/extreme/Projects/github.com/road-memo/app/build/outputs/apk/debug/app-debug.apk)
+构建产物位于 `app/build/outputs/apk/debug/app-debug.apk`。
 
 ## 项目结构
 
 ```text
 app/src/main/java/com/roadmemo/app/
 ├── data/           # Room、导出备份、仓储实现
-├── di/             # Hilt 注入
-├── domain/         # 领域模型与仓储接口
-├── navigation/     # 路由与导航
+├── di/             # Hilt 依赖注入
+├── domain/         # 领域模型、仓储接口、业务计算
+├── navigation/     # 路由与导航图
 └── ui/
     ├── components/ # 通用 Compose 组件
-    ├── screens/    # 页面
-    └── theme/      # 主题与配色
+    ├── screens/    # 页面（首页、记录、统计、设置等）
+    └── theme/      # 主题、配色、排版
 ```
 
-## 主要页面
+## 架构文档
 
-- 首页
-- 记录页
-- 统计页
-- 设置页
-- 车辆管理页
-- 提醒页
-- 能源 / 保养 / 费用 / 续期四类表单页
+- [数据模型](docs/architecture/roadmemo-v0.1-data-model.md)
+- [交互规格](docs/architecture/roadmemo-v0.1-interaction-spec.md)
+- [视觉基线](docs/architecture/roadmemo-v0.1-visual-baseline.md)
+- [设计系统](docs/architecture/roadmemo-v0.1-design-system-v1.md)
+- [能耗功能规划](docs/architecture/roadmemo-v0.1-consumption-feature-plan.md)
+- [冻结清单](docs/architecture/roadmemo-v0.1-freeze-checklist.md)
+- [交叉审查报告](docs/architecture/roadmemo-v0.1-cross-review-report.md)
 
-应用主入口：
+## 路线图
 
-- [RoadMemoApp.kt](/Users/extreme/Projects/github.com/road-memo/app/src/main/java/com/roadmemo/app/ui/RoadMemoApp.kt)
+### V0.1 (MVP) — 已完成
 
-## 产品与设计文档
+- [x] 多能源车型支持
+- [x] 能源 / 保养 / 费用 / 续期四类记录
+- [x] 首页摘要与提醒
+- [x] 基础统计与趋势
+- [x] CSV 导出与 JSON 备份恢复
+- [x] 油耗 / 电耗计算
 
-设计和架构文档位于：
+### 后续规划
 
-- [roadmemo-v0.1-data-model.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-data-model.md)
-- [RoadMemoDomainModelDraft.kt](/Users/extreme/Projects/github.com/road-memo/docs/architecture/RoadMemoDomainModelDraft.kt)
-- [roadmemo-v0.1-interaction-spec.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-interaction-spec.md)
-- [roadmemo-v0.1-visual-baseline.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-visual-baseline.md)
-- [roadmemo-v0.1-visual-reference-map.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-visual-reference-map.md)
-- [roadmemo-v0.1-freeze-checklist.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-freeze-checklist.md)
-- [roadmemo-v0.1-cross-review-report.md](/Users/extreme/Projects/github.com/road-memo/docs/architecture/roadmemo-v0.1-cross-review-report.md)
+- [ ] 自动化测试补充
+- [ ] 正式通知权限与 WorkManager 调度链
+- [ ] 更丰富的统计图表
+- [ ] 图片附件
+- [ ] 云同步（可选，本地优先）
+- [ ] OCR 票据识别
 
-## 当前已知边界
+## 贡献
 
-当前仍属于 MVP 阶段，以下能力尚未落地：
+项目目前处于早期阶段，欢迎 Issue 和 PR。
 
-- 登录与云同步
-- 图片附件
-- OCR 票据识别
-- 多设备同步
-- 收入 / 路线 / 网约车经营场景
-- 更精细的统计图表
-- 正式通知权限申请与后台提醒执行链路
+## License
 
-## 当前主线结论
-
-`RoadMemo V0.1` 的主线任务已完成，当前已具备：
-
-- 主链路可连续体验
-- 数据可导出、可备份、可恢复
-- 视觉和交互已完成一轮系统化收口
-
-当前未完成项主要属于：
-
-- 发版前人工验收
-- 正式通知权限与后台提醒执行链
-- 内测交付物补齐
-- 剩余少量 UI / 文案收尾
-
-## 建议的下一步
-
-- 补充自动化测试
-- 接正式通知权限与 WorkManager 调度链
-- 打磨发布前隐私说明与安装说明
-- 准备首版内测包
+MIT
